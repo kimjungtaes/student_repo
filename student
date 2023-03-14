@@ -1,0 +1,387 @@
+package sec01.exam01;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class StudentMain {
+
+	public static Scanner sc = new Scanner(System.in);
+	public static final int INPUT = 1, PRINT = 2, ANLYZE = 3, SEARCH = 4, UPDATE = 5, SORT = 6, DELETE = 7, EXIT = 8;
+	//main
+	public static void main(String[] args) {
+		// 지역변수선언
+		boolean run = true;
+		int no = 0;
+		ArrayList<Student> list = new ArrayList<>();
+		DBConnection dbCon = new DBConnection();
+		// 무한루트 
+		while (run) {
+			System.out.println("==============================================================");
+			System.out.println("1.입력 | 2.출력 | 3.분석 | 4.검색 | 5.수정 | 6.정렬 | 7.삭제 | 8.종료");
+			System.out.println("==============================================================");
+			System.out.print(">>");
+			no = Integer.parseInt(sc.nextLine());
+			switch (no) {
+
+			// data(학생정보)입력
+			
+			case INPUT:
+				Student student = inputDataStudent();
+				int rValue = dbCon.insert(student);
+				if (rValue == 1) {
+					System.out.println("================");
+					System.out.println("삽입을  성공했습니다.");
+					System.out.println("================");
+				} else {
+					System.out.println("===============");
+					System.out.println("삽입에 실패했습니다.");
+					System.out.println("===============");
+				}
+				break;
+			// data 출력
+			case PRINT:
+
+				ArrayList<Student> list2 = dbCon.select();
+				if (list == null) {
+					System.out.println("=================");
+					System.out.println("select에 실패했습니다");
+					System.out.println("=================");
+				} else {
+					
+					printStudent(list2);
+				}
+				break;
+			// data 분석
+			case ANLYZE:
+
+				ArrayList<Student> list3 = dbCon.analyzeSelect();
+				if (list3 == null) {
+					System.out.println("==============");
+					System.out.println("분석실패했습니다");
+					System.out.println("==============");
+				} else {
+					printAnalyze(list3);
+
+				}
+				break;
+			// data(학생이름 검색)
+			case SEARCH:
+
+				String dataName = searchStudent();
+				ArrayList<Student> list4 = dbCon.nameSearchSelect(dataName);
+				if (list4.size() >= 1) {
+					System.out.println(list4);
+				} else {
+					System.out.println("====================");
+					System.out.println("학생이름 검색 오류났습니다");
+					System.out.println("====================");
+				}
+				break;
+			// 학생정보 수정
+			case UPDATE:
+
+				int updateReturnValue = 0;
+				int id = inputId();
+				Student stu = dbCon.selectId(id);
+				if (stu == null) {
+					System.out.println("==============");
+					System.out.println("수정오류발생");
+					System.out.println("==============");
+				} else {
+					Student updataStudent = updateStudent(stu);
+					updateReturnValue = dbCon.update(updataStudent);
+				}
+				if (updateReturnValue == 1) {
+					System.out.println("==============");
+					System.out.println("update 성공");
+					System.out.println("==============");
+				} else {
+					System.out.println("==============");
+					System.out.println("update 실패");
+					System.out.println("==============");
+				}
+				break;
+			// 학생정보 정렬
+			case SORT:
+
+				ArrayList<Student> list5 = dbCon.selectSort();
+				if (list5 == null) {
+					System.out.println("===========");
+					System.out.println("정렬 실패");
+					System.out.println("===========");
+				} else {
+					printScoreSort(list5);
+				}
+				Collections.sort(list5, Collections.reverseOrder());
+				printStudent(list5);
+
+				break;
+			// 학생 정보 삭제
+			case DELETE:
+
+				int deleteid = inputId();
+				int deleteReturnValue = dbCon.delete(deleteid);
+				if (deleteReturnValue == 1) {
+					System.out.println("=========");
+					System.out.println("삭제 성공");
+					System.out.println("==========");
+				} else {
+					System.out.println("==========");
+					System.out.println("삭제 실패");
+					System.out.println("==========");
+					break;
+				}
+			case EXIT:
+				run = false;
+				break;
+			}
+		} // end of while
+		System.out.println("==============");
+		System.out.println("The End");
+		System.out.println("==============");
+	}// end of main
+
+	private static int printScoreSort(ArrayList<Student> list5) {
+		int score = 0;
+		while (true) {
+			try {
+				score = (int) ((Math.random() * 100 - 0 + 1) + 0);
+				Pattern pattern = Pattern.compile("^[0-9]{1,3}$");
+				Matcher matcher = pattern.matcher(String.valueOf(score));
+				if (matcher.find() && score <= 100) {
+					break;
+				} else {
+					System.out.println("점수 수정에 실패했습니다. 재입력요청");
+				}
+
+			} catch (Exception e) {
+				System.out.println("입력 오류가 발생했습니다.");
+				score = 0;
+				break;
+			}
+		}
+		return score;
+	}
+
+	// ID입력
+	private static int inputId() {
+		int id = 0;
+		boolean run = true;
+		System.out.println("ID 입력(number): ");
+		while (run) {
+			try {
+				id = Integer.parseInt(sc.nextLine());
+				if (id > 0 && id < Integer.MAX_VALUE) {
+					run = false;
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("id 입력오류" + e.getMessage());
+			}
+		}
+
+		return id;
+	}
+
+	// 학생 정보 삭제
+	private static void deleteStudent(ArrayList<Student> list, String name) {
+		boolean flag = false;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getName().equals(name)) {
+				list.remove(i);
+				flag = true;
+				System.out.println(name + "학생 정보가 초기화되었습니다. ");
+				break;
+			}
+		}
+		if (flag == false) {
+			System.out.println(name + "학생은 존재하지 않습니다.");
+		}
+
+	}
+
+	// 학생 정보 수정(국어,영어,수학)
+	private static Student updateStudent(Student stu) {
+		int kor = inputScoreSubject(stu.getName(), "국어", stu.getKor());
+		stu.setKor(kor);
+		int eng = inputScoreSubject(stu.getName(), "영어", stu.getEng());
+		stu.setEng(eng);
+		int math = inputScoreSubject(stu.getName(), "수학", stu.getMath());
+		stu.setMath(math);
+		
+		stu.calTotal();
+		stu.calAvg();
+		stu.calGrade();
+		System.out.print(stu);
+
+		return stu;
+	}
+	// 학생 정보 입력
+	private static int inputScoreSubject(String name, String string, int score) {
+		boolean run = true;
+		int data = 0;
+		while (run) {
+			System.out.println(name + string + score + ">>");
+			try {
+				data = Integer.parseInt(sc.nextLine());
+				Pattern pattern = Pattern.compile("^[0-9]{1,3}$");
+				Matcher matcher = pattern.matcher(String.valueOf(data));
+				if (matcher.find() && data > 0 && data <= 100) {
+					run = false;
+				} else {
+					System.out.println("입력값의 범위를 초과했습니다.");
+				}
+			} catch (Exception e) {
+				System.out.println("점수 입력에 오류 발생");
+				data = 0;
+			}
+		}
+		return data;
+	}
+	// 검색할 학생이름
+	private static String matchingNamePattern() {
+		String name = null;
+		while (true) {
+
+			try {
+				System.out.print("검색할 학생이름: ");
+				name = sc.nextLine();
+				Pattern pattern = Pattern.compile("^[가-힣]{2,4}$");
+				Matcher matcher = pattern.matcher(name);
+				if (!matcher.find()) {
+					System.out.println("이름 입력에 오류가 발생했습니다. 다시재입력요청합니다.");
+				} else {
+					break;
+				}
+			} catch (Exception e) {
+				System.out.println("입력에서 오류가 발생했습니다.");
+				break;
+			}
+		}
+		return name;
+	}
+
+	// 학생정보 검색
+	private static String searchStudent() {
+		String name = null;
+		boolean flag = false;
+		name = matchingNamePattern();
+		return name;
+	}
+	// 학생정보 수정
+	private static void printAnalyze(ArrayList<Student> list) {
+		for (Student data : list) {
+			System.out.println(data.getId() + "\t" + data.getName() + "\t" + data.getAge() + "\t" + data.getTotal()
+					+ "\t" + String.format("%.2f", data.getAvg()) + "\t" + data.getGrade());
+		}
+	}
+	private static void printStudent(ArrayList<Student> list) {
+		System.out.println("이름\t 나이\t 국어\t 영어\t 수학\t 총점\t 평균\t 등급");
+		for (Student data : list) {
+			System.out.println(data);
+		}
+	}
+	private static Student inputDataStudent() {
+		String name = StudentMain.randomName();
+		int age = inputAge();
+		int kor = inputScore();
+		int eng = inputScore();
+		int math = inputScore();
+		Student student = new Student(name, age, kor, eng, math);
+		student.calTotal();
+		student.calAvg();
+		student.calGrade();
+		return student;
+	}
+	// 점수 자동입력
+	private static int inputScore() {
+		int score = 0;
+		while (true) {
+			try {
+				score = (int) ((Math.random() * 100 - 0 + 1) + 0);
+				Pattern pattern = Pattern.compile("^[0-9]{1,3}$");
+				Matcher matcher = pattern.matcher(String.valueOf(score));
+				if (matcher.find() && score <= 100) {
+					break;
+				} else {
+					System.out.println("점수를 잘못입력하였습니다. 재입력요청");
+				}
+
+			} catch (Exception e) {
+				System.out.println("입력 오류가 발생했습니다.");
+				score = 0;
+				break;
+			}
+		}
+		return score;
+	}
+	// 나이 자동입력
+	private static int inputAge() {
+		int age = 0;
+		while (true) {
+			try {
+				age = (int) ((Math.random() * 101) + 1);
+				Pattern pattern = Pattern.compile("^[0-9]{1,3}$");
+				Matcher matcher = pattern.matcher(String.valueOf(age));
+				if (matcher.find() && age <= 100) {
+					break;
+				} else {
+					System.out.println("나이를 잘못입력하였습니다. 재입력요청");
+				}
+			} catch (Exception e) {
+				System.out.println("입력 오류가 발생했습니다.");
+				age = 0;
+				break;
+			}
+		}
+		return age;
+	}
+	// random 으로 이름 받기
+	public static String randomName() {
+		boolean run = true;
+		String first = null;
+		String second = null;
+		String third = null;
+		String name1 = null;
+		while (run) {
+			try {
+				String[] firstName = new String[] { "김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서",
+						"신", "권", "황", "안", "송", "류", "전", "홍", "고", "문", "양", "손", "배", "조", "백", "허", "유", "남", "심",
+						"노", "정", "하", "곽", "성", "차", "주", "우", "구", "신", "임", "나", "전", "민", "유", "진", "지", "엄", "채",
+						"원", "천", "방", "공", "강", "현", "함", "변", "염", "양", "변", "여", "추", "노", "도", "소", "신", "석", "선",
+						"설", "마", "길", "주", "연", "방", "위", "표", "명", "기", "반", "왕", "금", "옥", "육", "인", "맹", "제", "모",
+						"장", "남", "탁", "국", "여", "진", "어", "은", "편", "구", "용" };
+				String secondname[] = new String[] { "가", "강", "건", "경", "고", "관", "광", "구", "규", "근", "기", "길", "나",
+						"남", "노", "누", "다", "단", "달", "담", "대", "덕", "도", "동", "두", "라", "래", "로", "루", "리", "마", "만",
+						"명", "무", "문", "미", "민", "바", "박", "백", "범", "별", "병", "보", "빛", "사", "산", "상", "새", "서", "석",
+						"선", "설", "섭", "성", "세", "소", "솔", "수", "숙", "순", "숭", "슬", "승", "시", "신", "아", "안", "애", "엄",
+						"여", "연", "영", "예", "오", "옥", "완", "요", "용", "우", "원", "월", "위", "유", "윤", "율", "으", "은", "의",
+						"이", "익", "인", "일", "잎", "자", "잔", "장", "재", "전", "정", "제", "조", "종", "주", "준", "중", "지", "진",
+						"찬", "창", "채", "천", "철", "초", "춘", "충", "치", "탐", "태", "택", "판", "하", "한", "해", "혁", "현", "형",
+						"혜", "호", "홍", "화", "환", "회", "효", "훈", "휘", "희", "운", "모", "배", "부", "림", "봉", "혼", "황", "량",
+						"린", "을", "비", "솜", "공", "면", "탁", "온", "디", "항", "후", "려", "균", "묵", "송", "욱", "휴", "언", "령",
+						"섬", "들", "견", "추", "걸", "삼", "열", "웅", "분", "변", "양", "출", "타", "흥", "겸", "곤", "번", "식", "란",
+						"더", "손", "술", "훔", "반", "빈", "실", "직", "흠", "흔", "악", "람", "뜸", "권", "복", "심", "헌", "엽", "학",
+						"개", "롱", "평", "늘", "늬", "랑", "얀", "향", "울", "련" };
+				first = firstName[(int) (Math.random() * (firstName.length - 1 - 0 + 1) + 0)];
+				second = secondname[(int) (Math.random() * (secondname.length - 1 - 0 + 1) + 0)];
+				third = secondname[(int) (Math.random() * (secondname.length - 1 - 0 + 1) + 0)];
+				name1 = first + second + third;
+				Pattern pattern = Pattern.compile("^[가-힣]{2,4}$");
+				Matcher matcher = pattern.matcher(name1);
+				if (!matcher.find()) {
+					System.out.println("이름입력오류발생 다시재입력요청합니다.");
+				} else {
+					run = false;
+				}
+			} catch (Exception e) {
+				System.out.println("입력에 오류가 발생했습니다.");
+				name1 = null;
+				run = false;
+			}
+		} // end of while
+		return name1;
+	}
+} //end of main
