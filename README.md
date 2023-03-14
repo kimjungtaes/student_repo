@@ -7,5 +7,8 @@ input data
 ![image](https://user-images.githubusercontent.com/126849371/224887391-90088678-79fa-4110-9223-3f0bc4664749.png)
 
 out put data
+![image](https://user-images.githubusercontent.com/126849371/224889998-d8786ab4-4d06-4313-9ab2-c03b88d064ca.png)
 
+
+alnyze
 
