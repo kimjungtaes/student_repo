@@ -10,5 +10,10 @@ out put data
 ![image](https://user-images.githubusercontent.com/126849371/224889998-d8786ab4-4d06-4313-9ab2-c03b88d064ca.png)
 
 
-alnyze
+alnyze data
+![image](https://user-images.githubusercontent.com/126849371/224890106-beacbe86-51c7-452e-aeab-711982f00075.png)
+
+
+serach
+
 
